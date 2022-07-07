@@ -47,25 +47,19 @@ if [[ -z $(type -P curl) ]]; then
     ${PACKAGE_INSTALL[int]} curl
 fi
 
-if [[ -z (type -P docker) ]]; then
+if [[ -z $(type -P docker) ]]; then
     curl -fsSL https://get.docker.com | bash -s docker
 fi
-if [[ -z (type -P docker-compose) ]]; then
+if [[ -z $(type -P docker-compose) ]]; then
     curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
     ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 fi
 
-cd /home
-if [[ ! -d mydocker ]]; then
-    mkdir mydocker
-fi
-cd mydocker
-if [[ -d npm ]]; then
+if [[ ! -d npm ]]; then
     rm -rf npm
 fi
-mkdir npm
-cd npm
+mkdir npm && cd npm
 
 cat <<EOF > ~/docker-compose.yml
 version: "3"
@@ -77,7 +71,6 @@ services:
       - '80:80' # Public HTTP Port
       - '443:443' # Public HTTPS Port
       - '81:81' # Admin Web Port
-
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
