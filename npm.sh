@@ -61,6 +61,7 @@ if [[ ! -d npm ]]; then
 fi
 mkdir npm && cd npm
 
+read -rp "PORT: " PORT
 cat <<EOF > ~/docker-compose.yml
 version: "3"
 services:
@@ -70,10 +71,16 @@ services:
     ports:
       - '80:80' # Public HTTP Port
       - '443:443' # Public HTTPS Port
-      - '81:81' # Admin Web Port
+      - '${PORT}:81' # Admin Web Port
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
 EOF
 
 docker-compose up -d
+
+
+echo "====================================================="
+echo "Email: admin@example.com"
+echo "Password: changeme"
+echo "====================================================="
