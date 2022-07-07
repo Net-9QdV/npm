@@ -38,3 +38,57 @@ for ((int = 0; int < ${#REGEX[@]}; int++)); do
 done
 
 [[ $EUID -ne 0 ]] && red "注意: 请在root用户下运行脚本" && exit 1
+
+if [[ $SYSTEM == "CentOS" ]]; then
+    ${PACKAGE_UPDATE[int]}
+fi
+
+if [[ -z $(type -P curl) ]]; then
+    ${PACKAGE_INSTALL[int]} curl
+fi
+
+curl -fsSL https://get.docker.com | bash -s docker
+curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+chmod +x /usr/local/bin/docker-compose
+ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+cd /home
+if [[ ! -d mydocker ]]; then
+    mkdir mydocker
+fi
+cd mydocker
+if [[ -d npm ]]; then
+    rm -rf npm
+fi
+mkdir npm
+cd npm
+
+cat <<EOF > ~/docker-compose.yml
+version: "3"
+services:
+  app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    restart: unless-stopped
+    ports:
+      # These ports are in format <host-port>:<container-port>
+      - '80:80' # Public HTTP Port
+      - '443:443' # Public HTTPS Port
+      - '81:81' # Admin Web Port
+      # Add any other Stream port you want to expose
+      # - '21:21' # FTP
+
+    # Uncomment the next line if you uncomment anything in the section
+    # environment:
+      # Uncomment this if you want to change the location of 
+      # the SQLite DB file within the container
+      # DB_SQLITE_FILE: "/data/database.sqlite"
+
+      # Uncomment this if IPv6 is not enabled on your host
+      # DISABLE_IPV6: 'true'
+
+    volumes:
+      - ./data:/data
+      - ./letsencrypt:/etc/letsencrypt
+EOF
+
+docker-compose up -d
