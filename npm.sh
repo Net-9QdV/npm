@@ -19,7 +19,6 @@ yellow(){
     echo -e "\033[33m\033[01m$1\033[0m"
 }
 
-# 判断系统及定义系统安装依赖方式
 REGEX=("debian" "ubuntu" "centos|red hat|kernel|oracle linux|alma|rocky" "'amazon linux'" "fedora")
 RELEASE=("Debian" "Ubuntu" "CentOS" "CentOS" "Fedora")
 PACKAGE_UPDATE=("apt-get update" "apt-get update" "yum -y update" "yum -y update" "yum -y update")
@@ -61,7 +60,16 @@ if [[ ! -d npm ]]; then
 fi
 mkdir npm && cd npm
 
-read -rp "PORT: " PORT
+read -rp "请设置面板访问端口 [默认随机端口]: " config_port
+[[ -z $config_port ]] && config_port=$(shuf -i 1000-65535 -n 1)
+until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$config_port") ]]; do
+    if [[ -n $(ss -ntlp | awk '{print $4}' | grep -w  "$config_port") ]]; then
+        yellow "你设置的端口目前已被其他程序占用，请重新设置端口"
+        read -rp "请设置面板访问端口 [默认随机端口]: " config_port
+        [[ -z $config_port ]] && config_port=$(shuf -i 1000-65535 -n 1)
+    fi
+done
+
 cat <<EOF > ~/docker-compose.yml
 version: "3"
 services:
@@ -71,7 +79,7 @@ services:
     ports:
       - '80:80' # Public HTTP Port
       - '443:443' # Public HTTPS Port
-      - '${PORT}:81' # Admin Web Port
+      - '${config_port}:81' # Admin Web Port
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
@@ -81,6 +89,8 @@ docker-compose up -d
 
 
 echo "====================================================="
+echo "这是Nginx Proxy Manager的登录信息："
 echo "Email: admin@example.com"
 echo "Password: changeme"
+echo "请登陆后尽快修改初始密码！"
 echo "====================================================="
