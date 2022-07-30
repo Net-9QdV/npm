@@ -65,11 +65,11 @@ fi
 sleep 1
 
 if [[ -z $(type -P docker) ]]; then
-    yellow "检测到docker未安装，正在安装docker..."
+    yellow "检测到docker未安装，正在安装docker，大约需要3-5分钟时间..."
     curl -fsSL https://get.docker.com | bash -s docker
 fi
 if [[ -z $(type -P docker-compose) ]]; then
-    yellow "检测到docker-compose未安装，正在安装docker-compose..."
+    yellow "检测到docker-compose未安装，正在下载并安装docker-compose..."
     curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
     ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
