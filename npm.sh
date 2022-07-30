@@ -92,42 +92,20 @@ done
 yellow "正在安装Nginx Proxy Panel反代面板，请稍等..."
 
 cat <<EOF > /root/npm/docker-compose.yml
-version: "3"
+version: "3.7"
 services:
   app:
     image: 'jc21/nginx-proxy-manager:latest'
-    restart: unless-stopped
+    restart: always
     ports:
-      # These ports are in format <host-port>:<container-port>
-      - '80:80' # Public HTTP Port
-      - '443:443' # Public HTTPS Port
-      - '${config_port}:81' # Admin Web Port
-      # Add any other Stream port you want to expose
-      # - '21:21' # FTP
+      - '80:80'
+      - '443:443'
+      - '${config_port}:81'
     environment:
-      DB_MYSQL_HOST: "db"
-      DB_MYSQL_PORT: 3306
-      DB_MYSQL_USER: "npm"
-      DB_MYSQL_PASSWORD: "npm"
-      DB_MYSQL_NAME: "npm"
-      # Uncomment this if IPv6 is not enabled on your host
-      # DISABLE_IPV6: 'true'
+      DB_SQLITE_FILE: "/data/database.sqlite"
     volumes:
       - ./data:/data
       - ./letsencrypt:/etc/letsencrypt
-    depends_on:
-      - db
-
-  db:
-    image: 'jc21/mariadb-aria:latest'
-    restart: unless-stopped
-    environment:
-      MYSQL_ROOT_PASSWORD: 'npm'
-      MYSQL_DATABASE: 'npm'
-      MYSQL_USER: 'npm'
-      MYSQL_PASSWORD: 'npm'
-    volumes:
-      - ./data/mysql:/var/lib/mysql
 EOF
 
 docker-compose up -d
