@@ -70,6 +70,8 @@ until [[ -z $(ss -ntlp | awk '{print $4}' | grep -w "$config_port") ]]; do
     fi
 done
 
+yellow "正在安装Nginx Proxy Panel反代面板，请稍等..."
+
 cat <<EOF > ~/docker-compose.yml
 version: "3"
 services:
