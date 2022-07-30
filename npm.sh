@@ -46,6 +46,24 @@ if [[ -z $(type -P curl) ]]; then
     ${PACKAGE_INSTALL[int]} curl
 fi
 
+yellow "正在检查VPS的IP配置环境, 请稍等..." && sleep 1
+WgcfIPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+WgcfIPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
+if [[ $WgcfIPv4Status =~ "on"|"plus" ]] || [[ $WgcfIPv6Status =~ "on"|"plus" ]]; then
+    wg-quick down wgcf >/dev/null 2>&1
+    v6=`curl -s6m8 https://ip.gs -k`
+    v4=`curl -s4m8 https://ip.gs -k`
+    wg-quick up wgcf >/dev/null 2>&1
+else
+    v6=`curl -s6m8 https://ip.gs -k`
+    v4=`curl -s4m8 https://ip.gs -k`
+    if [[ -z $v4 && -n $v6 ]]; then
+        yellow "检测到为纯IPv6 VPS, 已自动添加DNS64解析服务器"
+        echo -e "nameserver 2a01:4f8:c2c:123f::1" > /etc/resolv.conf
+    fi
+fi
+sleep 1
+
 if [[ -z $(type -P docker) ]]; then
     curl -fsSL https://get.docker.com | bash -s docker
 fi
@@ -55,10 +73,8 @@ if [[ -z $(type -P docker-compose) ]]; then
     ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
 fi
 
-if [[ ! -d npm ]]; then
-    rm -rf npm
-fi
-mkdir npm && cd npm
+rm -rf /root/npm
+mkdir /root/npm
 
 read -rp "请设置面板访问端口 [默认随机端口]: " config_port
 [[ -z $config_port ]] && config_port=$(shuf -i 1000-65535 -n 1)
@@ -72,7 +88,7 @@ done
 
 yellow "正在安装Nginx Proxy Panel反代面板，请稍等..."
 
-cat <<EOF > ~/docker-compose.yml
+cat <<EOF > /root/npm/docker-compose.yml
 version: "3"
 services:
   app:
@@ -92,7 +108,15 @@ docker-compose up -d
 
 echo "====================================================="
 echo "这是Nginx Proxy Manager的登录信息："
-echo "Email: admin@example.com"
-echo "Password: changeme"
-echo "请登陆后尽快修改初始密码！"
+if [[ -n $v4 && -z $v6 ]]; then
+    echo -e "面板IPv4登录地址为: ${GREEN}http://$v4:$config_port ${PLAIN}"
+elif [[ -n $v6 && -z $v4 ]]; then
+    echo -e "面板IPv6登录地址为: ${GREEN}http://[$v6]:$config_port ${PLAIN}"
+elif [[ -n $v4 && -n $v6 ]]; then
+    echo -e "面板IPv4登录地址为: ${GREEN}http://$v4:$config_port ${PLAIN}"
+    echo -e "面板IPv6登录地址为: ${GREEN}http://[$v6]:$config_port ${PLAIN}"
+fi
+echo -e "Email: ${GREEN}admin@example.com${PLAIN}"
+echo -e "Password: ${GREEN}changeme${PLAIN}"
+red "请登陆后尽快修改初始密码！"
 echo "====================================================="
