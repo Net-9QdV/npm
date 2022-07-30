@@ -51,12 +51,12 @@ WgcfIPv4Status=$(curl -s4m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep w
 WgcfIPv6Status=$(curl -s6m8 https://www.cloudflare.com/cdn-cgi/trace -k | grep warp | cut -d= -f2)
 if [[ $WgcfIPv4Status =~ "on"|"plus" ]] || [[ $WgcfIPv6Status =~ "on"|"plus" ]]; then
     wg-quick down wgcf >/dev/null 2>&1
-    v6=`curl -s6m8 https://ip.gs -k`
-    v4=`curl -s4m8 https://ip.gs -k`
+    v6=$(curl -s6m8 https://ip.gs -k)
+    v4=$(curl -s4m8 https://ip.gs -k)
     wg-quick up wgcf >/dev/null 2>&1
 else
-    v6=`curl -s6m8 https://ip.gs -k`
-    v4=`curl -s4m8 https://ip.gs -k`
+    v6=$(curl -s6m8 https://ip.gs -k)
+    v4=$(curl -s4m8 https://ip.gs -k)
     if [[ -z $v4 && -n $v6 ]]; then
         yellow "检测到为纯IPv6 VPS, 已自动添加DNS64解析服务器"
         echo -e "nameserver 2a01:4f8:c2c:123f::1" > /etc/resolv.conf
