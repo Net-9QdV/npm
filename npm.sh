@@ -75,6 +75,7 @@ fi
 
 rm -rf /root/npm
 mkdir /root/npm
+cd /root/npm
 
 read -rp "请设置面板访问端口 [默认随机端口]: " config_port
 [[ -z $config_port ]] && config_port=$(shuf -i 1000-65535 -n 1)
