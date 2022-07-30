@@ -108,7 +108,7 @@ docker-compose up -d
 
 
 echo "====================================================="
-echo "这是Nginx Proxy Manager的登录信息："
+yellow "这是Nginx Proxy Manager的登录信息："
 if [[ -n $v4 && -z $v6 ]]; then
     echo -e "面板IPv4登录地址为: ${GREEN}http://$v4:$config_port ${PLAIN}"
 elif [[ -n $v6 && -z $v4 ]]; then
