@@ -38,7 +38,7 @@ done
 
 [[ $EUID -ne 0 ]] && red "注意: 请在root用户下运行脚本" && exit 1
 
-if [[ $SYSTEM == "CentOS" ]]; then
+if [[ ! $SYSTEM == "CentOS" ]]; then
     ${PACKAGE_UPDATE[int]}
 fi
 
