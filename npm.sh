@@ -10,11 +10,9 @@ PLAIN='\033[0m'
 red(){
     echo -e "\033[31m\033[01m$1\033[0m"
 }
-
 green(){
     echo -e "\033[32m\033[01m$1\033[0m"
 }
-
 yellow(){
     echo -e "\033[33m\033[01m$1\033[0m"
 }
@@ -124,5 +122,7 @@ elif [[ -n $v4 && -n $v6 ]]; then
 fi
 echo -e "Email: ${GREEN}admin@example.com${PLAIN}"
 echo -e "Password: ${GREEN}changeme${PLAIN}"
-red "请登陆后尽快修改初始密码！"
+green "提示："
+yellow "1. 请在系统防火墙及VPS防火墙设置放开 $config_port 端口"
+red "2. 请登陆后尽快修改初始密码！"
 echo "====================================================="
